@@ -30,7 +30,7 @@ class PickleDataset(data.Dataset):
 		return self.pickle[index].transpose(2,0,1)
 
 	def __len__(self):
-		return 8#self.pickle.shape[0]
+		return self.pickle.shape[0]
 
 def PickleLoader(pickle, bs):
 	return data.DataLoader(

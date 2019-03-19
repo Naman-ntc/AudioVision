@@ -99,7 +99,6 @@ class EncDiscBlock(nn.Module):
                         ]
                 self.layer1 = nn.Sequential(*self.layer1)
                 self.layer2 = nn.Sequential(*self.layer2)
-                #self.layer = nn.Sequential(*(self.layer1 + self.layer2))
 
 
         def forward(self, x):
@@ -126,7 +125,6 @@ class EncDiscEndBlock(nn.Module):
                 self.layer2 = [
                                 nn.BatchNorm2d(self.encChannels),
                                 nn.Conv2d(self.encChannels, self.latentDim, kernel_size=specRatio),
-                                nn.LeakyReLU(0.2) if leakyRelu else nn.ReLU(),
                         ]
                 self.layer = nn.Sequential(*(self.layer1 + self.layer2))
 
