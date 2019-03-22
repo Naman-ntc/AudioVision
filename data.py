@@ -1,7 +1,7 @@
 import pickle
 import torch.utils.data as data
 
-
+import numpy as np
 # class VEGAS(data.Dataset):
 # 	"""docstring for VEGAS"""
 # 	def __init__(self, opts, split):
@@ -22,15 +22,21 @@ import torch.utils.data as data
 
 class PickleDataset(data.Dataset):
 	"""docstring for PickleDataset"""
-	def __init__(self, pickle):
+	def __init__(self, mypickle):
 		super(PickleDataset, self).__init__()
-		self.pickle = pickle
+		self.mypickle = mypickle.transpose(0,3,1,2)
+		self.stats = tuple(x.astype(np.float) for x in pickle.load(open('stats.pkl', 'rb')))
+		zeros = np.where(self.stats[1]==0)
+		self.stats[0][zeros]=1
+		self.stats[1][zeros]=1
 
 	def __getitem__(self, index):
-		return self.pickle[index].transpose(2,0,1)
+		temp = (self.mypickle[index] - self.stats[0])/self.stats[1]
+		return temp.astype(np.float32)
+		return self.mypickle[index]
 
 	def __len__(self):
-		return self.pickle.shape[0]
+		return self.mypickle.shape[0]
 
 def PickleLoader(pickle, bs):
 	return data.DataLoader(

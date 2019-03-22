@@ -3,6 +3,8 @@ import torchvision
 import torch.nn as nn
 import torch.nn.functional as F
 
+ngroups=1
+
 class Identity(nn.Module):
         """docstring for Identity"""
         def __init__(self):
@@ -33,13 +35,13 @@ class GenInitBlock(nn.Module):
                 self.leakyRelu = leakyRelu
 
                 self.layer1 = [
-                                nn.ConvTranspose2d(self.latentDim, self.genChannels, self.specRatio),
+                                nn.ConvTranspose2d(self.latentDim, self.genChannels, self.specRatio, groups=ngroups),
                                 nn.LeakyReLU(0.2) if leakyRelu else nn.ReLU(),
-                        ] + ([PixelNorm()] if pixelNorm else [])
+                        ] + [nn.GroupNorm(ngroups, self.genChannels)]
                 self.layer2 = [
-                                nn.Conv2d(self.genChannels, self.genChannels, kernel_size=3, padding=1),
+                                nn.Conv2d(self.genChannels, self.genChannels, kernel_size=3, padding=1, groups=ngroups),
                                 nn.LeakyReLU(0.2) if leakyRelu else nn.ReLU(),
-                        ] + ([PixelNorm()] if pixelNorm else [nn.BatchNorm2d(self.genChannels)])
+                        ] + [nn.GroupNorm(ngroups, self.genChannels)]
                 self.layer = nn.Sequential(*(self.layer1+self.layer2))
                 
         def forward(self, x):
@@ -54,15 +56,15 @@ class GenBlock(nn.Module):
                 self.pixelNorm = pixelNorm
                 self.leakyRelu = leakyRelu
                 self.deConv = deConv
-                self.channels = nn.Conv2d(self.genChannels1, self.genChannels2, kernel_size=1) 
+                self.channels = nn.Conv2d(self.genChannels1, self.genChannels2, kernel_size=1, groups=ngroups) 
                 self.layer1 = [
-                                nn.Conv2d(self.genChannels2, self.genChannels2, kernel_size=3, padding=1),
+                                nn.Conv2d(self.genChannels2, self.genChannels2, kernel_size=3, padding=1, groups=ngroups),
                                 nn.LeakyReLU(0.2) if leakyRelu else nn.ReLU(),
-                        ] + ([PixelNorm()] if pixelNorm else [nn.BatchNorm2d(self.genChannels2)])
+                        ] + [nn.GroupNorm(ngroups, self.genChannels2)]
                 self.layer2 = [
-                                nn.Conv2d(self.genChannels2, self.genChannels2, kernel_size=3, padding=1),
+                                nn.Conv2d(self.genChannels2, self.genChannels2, kernel_size=3, padding=1, groups=ngroups),
                                 nn.LeakyReLU(0.2) if leakyRelu else nn.ReLU(),
-                        ] + ([PixelNorm()] if pixelNorm else [nn.BatchNorm2d(self.genChannels2)])
+                        ] + [nn.GroupNorm(ngroups, self.genChannels2)]
                 self.layer1 = nn.Sequential(*self.layer1)
                 self.layer2 = nn.Sequential(*self.layer2)
                 #self.layer = nn.Sequential(*(self.layer1 + self.layer2))
@@ -86,15 +88,15 @@ class EncDiscBlock(nn.Module):
                 self.Pooling = Pooling
 
                 self.pooling = getattr(nn, self.Pooling)(2,2) if self.Pooling else Identity()
-                self.channels = nn.Conv2d(self.encChannels1, self.encChannels2, kernel_size=1) 
+                self.channels = nn.Conv2d(self.encChannels1, self.encChannels2, kernel_size=1, groups=ngroups) 
                 self.layer1 = [
-                                nn.BatchNorm2d(self.encChannels2),
-                                nn.Conv2d(self.encChannels2, self.encChannels2, kernel_size=3, padding=1),
+                                nn.GroupNorm(ngroups, self.encChannels2),
+                                nn.Conv2d(self.encChannels2, self.encChannels2, kernel_size=3, padding=1, groups=ngroups),
                                 nn.LeakyReLU(0.2) if leakyRelu else nn.ReLU(),
                         ]
                 self.layer2 = [
-                                nn.BatchNorm2d(self.encChannels2),
-                                nn.Conv2d(self.encChannels2, self.encChannels2, kernel_size=3, padding=1),
+                                nn.GroupNorm(ngroups, self.encChannels2),
+                                nn.Conv2d(self.encChannels2, self.encChannels2, kernel_size=3, padding=1, groups=ngroups),
                                 nn.LeakyReLU(0.2) if leakyRelu else nn.ReLU(),
                         ]
                 self.layer1 = nn.Sequential(*self.layer1)
@@ -118,13 +120,13 @@ class EncDiscEndBlock(nn.Module):
                 self.Pooling = Pooling
 
                 self.layer1 = [
-                                nn.BatchNorm2d(self.encChannels),
-                                nn.Conv2d(self.encChannels, self.encChannels, kernel_size=3, padding=1),
+                                nn.GroupNorm(ngroups, self.encChannels),
+                                nn.Conv2d(self.encChannels, self.encChannels, kernel_size=3, padding=1, groups=ngroups),
                                 nn.LeakyReLU(0.2) if leakyRelu else nn.ReLU(),
                         ]
                 self.layer2 = [
-                                nn.BatchNorm2d(self.encChannels),
-                                nn.Conv2d(self.encChannels, self.latentDim, kernel_size=specRatio),
+                                nn.GroupNorm(ngroups, self.encChannels),
+                                nn.Conv2d(self.encChannels, self.latentDim, kernel_size=specRatio, groups=ngroups),
                         ]
                 self.layer = nn.Sequential(*(self.layer1 + self.layer2))
 

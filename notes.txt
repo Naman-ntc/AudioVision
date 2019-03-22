@@ -1,0 +1,7 @@
+Changed data.py for normalizing
+Changed audio saving code for reconstructions
+Changed tanh non-lineatrity
+Changed weight to 0.1
+Changed optim.step to batch%2!!! and then back to 1
+
+Changed BatchNorm2d to GroupNorm (num_gps =1, so should be equal!?) 

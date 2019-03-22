@@ -5,6 +5,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import modules.audiomodules as A
 
+ngroups=1
+
 def vae_loss(mean, sigma, out, target, weight=1):
 	mean_sq = mean*mean
 	sigma_sq = sigma*sigma
@@ -32,7 +34,7 @@ class AudioVAE(nn.Module):
 		N = x.shape[0]
 		mean, log_sigma = self.encoder(x)
 		sigma = torch.exp(log_sigma)
-		sampled = mean #+ sigma*torch.randn(N,self.latentDim).to(self.gpu)
+		sampled = mean + sigma*torch.randn(N,self.latentDim).to(self.gpu)
 		out = self.decoder(sampled)
 		return mean,sigma,out
 
@@ -46,7 +48,7 @@ class AudioEncoder(nn.Module):
 				self.specShape = specShape
 				self.leakyRelu = leakyRelu
 
-				self.initblock = nn.Conv2d(2, encChannels//16, kernel_size=1)
+				self.initblock = nn.Conv2d(2, encChannels//16, kernel_size=1, groups=ngroups)
 				self.blocks = nn.ModuleList([
 						A.EncDiscBlock(encChannels//16, encChannels//8, leakyRelu, 'AvgPool2d'),
 						A.EncDiscBlock(encChannels//8, encChannels//8, leakyRelu, False),
@@ -102,7 +104,7 @@ class AudioGenerator(nn.Module):
 						A.GenBlock(genChannels//8, genChannels//16, pixelNorm, leakyRelu, deConv=True),
 						A.GenBlock(genChannels//16, genChannels//16, pixelNorm, leakyRelu, deConv=False),
 				])
-				self.endblock = nn.Conv2d(genChannels//16, 2, kernel_size=1)
+				self.endblock = nn.Conv2d(genChannels//16, 2, kernel_size=1, groups=ngroups)
 
 		def forward(self, x):
 				#print(x.shape)
@@ -116,6 +118,7 @@ class AudioGenerator(nn.Module):
 				for block in self.blocks:
 						x = block(x)
 				x = self.endblock(x)
+				x = F.tanh(x)
 				return x
 
 
