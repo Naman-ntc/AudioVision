@@ -118,7 +118,7 @@ class AudioGenerator(nn.Module):
 				for block in self.blocks:
 						x = block(x)
 				x = self.endblock(x)
-				x = F.tanh(x)
+				#x = F.tanh(x)
 				return x
 
 

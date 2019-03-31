@@ -15,7 +15,7 @@ from specgrams_helper import *
 
 mystats = tuple(x.astype(np.float32) for x in pickle.load(open('stats.pkl', 'rb')))
 zeros = np.where(mystats[1]==0)
-mystats[0][zeros]=1
+mystats[0][zeros]=0
 mystats[1][zeros]=1
 
 
@@ -35,7 +35,8 @@ def temp(epoch):
 
 	helper = SpecgramsHelper(2*sampleRate, tuple([192, 512]), 0.75, sampleRate, 1)
 	outtrue = helper.melspecgrams_to_waves(specs.cpu().detach().numpy().transpose(0,2,3,1))
-	outre = helper.melspecgrams_to_waves((mystats[1][None,:,:,:]*reconstructed.cpu().detach().numpy()+mystats[0][None,:,:,:]).transpose(0,2,3,1))
+	#outre = helper.melspecgrams_to_waves((mystats[1][None,:,:,:]*reconstructed.cpu().detach().numpy()+mystats[0][None,:,:,:]).transpose(0,2,3,1))
+	outre = helper.melspecgrams_to_waves((reconstructed.cpu().detach().numpy()).transpose(0,2,3,1))
 	import tensorflow as tf
 	with tf.Session() as sess:
 		outtrue = outtrue.eval()
@@ -51,17 +52,17 @@ def temp(epoch):
 #opts = opts().parse()
 gpu = 1
 EXP_BASE = 'exp'
-EXP_DIR = 'VAE-i=2,j=7,normalized-w0.01'
-batchSize = 8
+EXP_DIR = 'VAE-i=2,j=7,gen-large-w0.01'
+batchSize = 64
 
-weight = .01
+weight = .001
 
 Model = AudioVAE(gpu=gpu).to(gpu)
 Model = Model
 
 LR = {
-	'Encoder' : 1e-4, 
-	'Generator' : 1e-4,
+	'Encoder' : 1e-3, 
+	'Generator' : 1e-3,
    }
 
 Optimizer = {
@@ -89,12 +90,13 @@ for epoch in range(1300):
 			specs = specs.to(gpu)
 			#specs[:,0,:,:] = specs[:,1,:,:]
 			mean, sigma, reconstructed = Model(specs)
+			print([x.item() for x in [reconstructed.mean(),reconstructed.std(),reconstructed.max(),reconstructed.min()]])
 			losses = vae_loss(mean, sigma, reconstructed, specs, weight)
 			loss = sum(list(losses))
 			loss.backward()
 			Losses[0].update(losses[0].item(), specs.shape[0])
 			Losses[1].update(losses[1].item(), specs.shape[0])
-			if (batch_idx%1==1):
+			if (batch_idx%1==0):
 				for _,myoptim in Optimizer.items():
 					myoptim.step()
 					myoptim.zero_grad()

@@ -27,16 +27,19 @@ class PickleDataset(data.Dataset):
 		self.mypickle = mypickle.transpose(0,3,1,2)
 		self.stats = tuple(x.astype(np.float) for x in pickle.load(open('stats.pkl', 'rb')))
 		zeros = np.where(self.stats[1]==0)
-		self.stats[0][zeros]=1
+		self.stats[0][zeros]=0
 		self.stats[1][zeros]=1
 
+		#self.randomdata = np.random.randn(5,2,192,512)
+
 	def __getitem__(self, index):
-		temp = (self.mypickle[index] - self.stats[0])/self.stats[1]
-		return temp.astype(np.float32)
+		#return self.randomdata[index].astype(np.float32)
+		#temp = (self.mypickle[index] - self.stats[0])/self.stats[1]
+		#return temp.astype(np.float32)
 		return self.mypickle[index]
 
 	def __len__(self):
-		return self.mypickle.shape[0]
+		return 5#self.mypickle.shape[0]
 
 def PickleLoader(pickle, bs):
 	return data.DataLoader(
