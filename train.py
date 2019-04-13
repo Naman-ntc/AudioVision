@@ -50,29 +50,26 @@ def temp(epoch):
 	return
 
 #opts = opts().parse()
-gpu = 1
-EXP_BASE = 'exp'
-EXP_DIR = 'VAE-i=2,j=7,gen-large-w0.01'
-batchSize = 64
+gpu = opts.gpu
+batchSize = opts.batch_size
 
-weight = .001
+weight = opts.weight
 
 Model = AudioVAE(gpu=gpu).to(gpu)
 Model = Model
 
 LR = {
-	'Encoder' : 1e-3, 
-	'Generator' : 1e-3,
+	'Encoder' : opts.encLR, 
+	'Generator' : opts.genLR,
    }
 
 Optimizer = {
-		'Encoder':optim.Adam(Model.encoder.parameters(), lr=LR['Encoder']), 
-		'Generator':optim.Adam(Model.decoder.parameters(), lr=LR['Generator'])
+		'Encoder':getitem(optim, opts.enc_optimizer_type)(Model.encoder.parameters(), lr=LR['Encoder']), 
+		'Generator':getitem(optim, opts.gen_optimizer_type)(Model.decoder.parameters(), lr=LR['Generator'])##Nomenclature TODO
 	}
-BasePath = '../VEGAS/VEGAS/data/'
+BasePath = opts.basepath
 
-ensure_dir((os.path.join(EXP_BASE, EXP_DIR)))
-file = os.path.join(EXP_BASE, EXP_DIR, 'log.txt')
+# file = opt.logfile
 for epoch in range(1300):
 	for i,j in itertools.product(range(4), range(10)):
 		i=2

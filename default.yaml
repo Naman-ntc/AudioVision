@@ -1,0 +1,32 @@
+expDir = exp
+expID = debug
+
+gpu = 0
+
+batch_size = 16
+mini_batch_count = 4
+
+encLR = 3e-4
+genLR = 3e-4
+enc_optimizer_type = Adam
+gen_optimizer_type = Adam
+
+saveInterval = 5
+dropInterval = 5
+dumpInterval = 5
+dropLR = 12
+dropMag = 0.5
+
+weight = 1e-3
+
+basepath = ../VEGAS/VEGAS/data/
+
+latentDim = 128
+encChannels = 128
+genChannels = 128
+specRatio = 3,8
+specShape = 192,512
+leakyRelu = 1
+pixelNorm = 0
+normalize_latents = 0
+normalize_data = 1
