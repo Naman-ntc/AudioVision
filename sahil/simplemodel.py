@@ -10,6 +10,7 @@ ngroups=1
 logRootTwoPi = math.log(math.sqrt(2 * math.pi))
 
 def vae_loss(mean, sigma, outMean, outSigma, target, index, weight=1):
+	## though the name is vae here, the loss is actually MSE because we multiply the latent loss by 0
 	mean_sq = mean*mean
 	sigma_sq = sigma*sigma
 	latent_loss = 0 * torch.mean(mean_sq + sigma_sq - torch.log(sigma_sq) - 1)

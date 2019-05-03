@@ -20,9 +20,9 @@ class Identity(nn.Module):
 
 
 def vae_loss(audfeat,imfeat,outMean1,outMean2,target):
-	audtarget_loss = 0#F.mse_loss(outMean1, target)
+	audtarget_loss = F.mse_loss(outMean1, target)
 	imtarget_loss = F.mse_loss(outMean2, target)
-	latent_loss = 0#F.mse_loss(imfeat, audfeat)
+	latent_loss = F.mse_loss(imfeat, audfeat)
 	return audtarget_loss,imtarget_loss,latent_loss
 
 
