@@ -56,7 +56,7 @@ class AudioEncoder(nn.Module):
 				self.leakyRelu = leakyRelu
 
 				# self.initblock = nn.Conv2d(2, encChannels//16, kernel_size=1, groups=ngroups)
-				self.initblock = nn.Conv2d(2, encChannels//8, kernel_size=1, groups=ngroups)
+				self.initblock = nn.Conv2d(1, encChannels//8, kernel_size=1, groups=ngroups)
 				self.blocks = nn.ModuleList([
 						# A.EncDiscBlock(encChannels//16, encChannels//8, leakyRelu, 'AvgPool2d'),
 						# A.EncDiscBlock(encChannels//8, encChannels//8, leakyRelu, False),
@@ -116,8 +116,8 @@ class AudioGenerator(nn.Module):
 						# A.GenBlock(genChannels//16, genChannels//16, pixelNorm, leakyRelu, deConv=False),
 				])
 				# self.endblock = nn.Conv2d(genChannels//16, 2, kernel_size=1, groups=ngroups)
-				self.endblockmean = nn.Conv2d(genChannels//8, 2, kernel_size=1, groups=ngroups)
-				self.endblocklogsig = nn.Conv2d(genChannels//8, 2, kernel_size=1, groups=ngroups)
+				self.endblockmean = nn.Conv2d(genChannels//8, 1, kernel_size=1, groups=ngroups)
+				self.endblocklogsig = nn.Conv2d(genChannels//8, 1, kernel_size=1, groups=ngroups)
 
 		def forward(self, x):
 				#print(x.shape)

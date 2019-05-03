@@ -1,3 +1,6 @@
+*.pkl
+*.pth
+*.wav
 exp
 exp/*
 # Byte-compiled / optimized / DLL files
