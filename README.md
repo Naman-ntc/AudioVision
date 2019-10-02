@@ -22,7 +22,7 @@ Code to run : `python exp2.py` (to use custom data, use `data` variable line 21 
 ## Requirements
 ```
 pytorch
-progress
 librosa
+progress
 numpy, pickle and some standard libraries
 ```
